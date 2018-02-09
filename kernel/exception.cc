@@ -236,13 +236,12 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
           Thread* ptThread;
 	  tid = g_machine->ReadIntRegister(4);
 	  ptThread = (Thread *)g_object_ids->SearchObject(tid);
-	  if (ptThread
-	      && ptThread->type == THREAD_TYPE)
-	    {
-	      g_current_thread->Join(ptThread);
-	      g_syscall_error->SetMsg((char*)"",NO_ERROR);
-	      g_machine->WriteIntRegister(2,0);      
-	    }
+		if (ptThread && ptThread->type == THREAD_TYPE)
+		{
+			g_current_thread->Join(ptThread);
+			g_syscall_error->SetMsg((char*)"",NO_ERROR);
+			g_machine->WriteIntRegister(2,0);      
+		}
 	  else
 	    // Thread already terminated (type set to INVALID_TYPE) or call on an object
 	    // that is not a thread
@@ -630,54 +629,182 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
 #ifdef ETUDIANTS_TP
 	case SC_SEM_CREATE:{
 		DEBUG('e', (char*)"Sem: Create call.\n");
+		int size, addr;
+		int count = g_machine->ReadIntRegister(5);
+		addr = g_machine->ReadIntRegister(4);
+		size = GetLengthParam(addr);
+		char name[size];
+		GetStringParam(addr,name,size);
+		Semaphore* sem = new Semaphore(name, count);
+		int id = g_object_ids->AddObject(sem);
+		g_machine->WriteIntRegister(2,id);
 		break;
 	}
 	case SC_SEM_DESTROY:{
 		DEBUG('e', (char*)"Sem: Destroy call.\n");
+		int sid;
+		Semaphore* sem;
+		sid = g_machine->ReadIntRegister(4);
+		sem = (Semaphore *)g_object_ids->SearchObject(sid);
+		if (sem && sem->type == SEMAPHORE_TYPE)
+		{
+			g_object_ids->RemoveObject(sid);
+			delete sem;
+			g_syscall_error->SetMsg((char*)"",NO_ERROR);
+			g_machine->WriteIntRegister(2,0);
+		}
 		break;
 	}
 	case SC_P:{
 		DEBUG('e', (char*)"Sem: P call.\n");
+		int sid;
+		Semaphore* sem;
+		sid = g_machine->ReadIntRegister(4);
+		sem = (Semaphore *)g_object_ids->SearchObject(sid);
+		if (sem && sem->type == SEMAPHORE_TYPE)
+		{
+			sem.P();
+			g_syscall_error->SetMsg((char*)"",NO_ERROR);
+			g_machine->WriteIntRegister(2,0);
+		}
 		break;
 	}
 	case SC_V:{
 		DEBUG('e', (char*)"Sem: V call.\n");
+		int sid;
+		Semaphore* sem;
+		sid = g_machine->ReadIntRegister(4);
+		sem = (Semaphore *)g_object_ids->SearchObject(sid);
+		if (sem && sem->type == SEMAPHORE_TYPE)
+		{
+			sem.V();
+			g_syscall_error->SetMsg((char*)"",NO_ERROR);
+			g_machine->WriteIntRegister(2,0);
+		}
 		break;
 	}
 	case SC_LOCK_CREATE:{
 		DEBUG('e', (char*)"Lock: Create call.\n");
+		int size, addr;
+		addr = g_machine->ReadIntRegister(4);
+		size = GetLengthParam(addr);
+		char name[size];
+		GetStringParam(addr,name,size);
+		Lock* lock = new Lock(name);
+		int id = g_object_ids->AddObject(lock);
+		g_machine->WriteIntRegister(2,id);
 		break;
 	}
 	case SC_LOCK_DESTROY:{
 		DEBUG('e', (char*)"Lock: Destroy call.\n");
+		int lid;
+		Lock* lock;
+		lid = g_machine->ReadIntRegister(4);
+		lock = (Lock *)g_object_ids->SearchObject(lid);
+		if (lock && lock->type == LOCK_TYPE)
+		{
+			g_object_ids->RemoveObject(lid);
+			delete lock;
+			g_syscall_error->SetMsg((char*)"",NO_ERROR);
+			g_machine->WriteIntRegister(2,0);
+		}
 		break;
 	}
 	case SC_LOCK_ACQUIRE:{
 		DEBUG('e', (char*)"Lock: Acquire call.\n");
+		int lid;
+		Lock* lock;
+		lid = g_machine->ReadIntRegister(4);
+		lock = (Lock *)g_object_ids->SearchObject(lid);
+		if (lock && lock->type == LOCK_TYPE)
+		{
+			lock.Acquire();
+			g_syscall_error->SetMsg((char*)"",NO_ERROR);
+			g_machine->WriteIntRegister(2,0);
+		}
 		break;
 	}
 	case SC_LOCK_RELEASE:{
 		DEBUG('e', (char*)"Lock: Release call.\n");
+		int lid;
+		Lock* lock;
+		lid = g_machine->ReadIntRegister(4);
+		lock = (Lock *)g_object_ids->SearchObject(lid);
+		if (lock && lock->type == LOCK_TYPE)
+		{
+			lock.Release();
+			g_syscall_error->SetMsg((char*)"",NO_ERROR);
+			g_machine->WriteIntRegister(2,0);
+		}
 		break;
 	}
 	case SC_COND_CREATE:{
 		DEBUG('e', (char*)"Cond: Create call.\n");
+		int size, addr;
+		addr = g_machine->ReadIntRegister(4);
+		size = GetLengthParam(addr);
+		char name[size];
+		GetStringParam(addr,name,size);
+		Condition* cond = new Condition(name);
+		int id = g_object_ids->AddObject(cond);
+		g_machine->WriteIntRegister(2,id);
 		break;
 	}
 	case SC_COND_DESTROY:{
 		DEBUG('e', (char*)"Cond: Destroy call.\n");
+		int cid;
+		Condition* cond;
+		cid = g_machine->ReadIntRegister(4);
+		cond = (Condition *)g_object_ids->SearchObject(cid);
+		if (cond && cond->type == CONDITION_TYPE)
+		{
+			g_object_ids->RemoveObject(cid);
+			delete cond;
+			g_syscall_error->SetMsg((char*)"",NO_ERROR);
+			g_machine->WriteIntRegister(2,0);
+		}
 		break;
 	}
 	case SC_COND_WAIT:{
 		DEBUG('e', (char*)"Cond: Wait call.\n");
+		int cid;
+		Condition* cond;
+		cid = g_machine->ReadIntRegister(4);
+		cond = (Condition *)g_object_ids->SearchObject(cid);
+		if (cond && cond->type == CONDITION_TYPE)
+		{
+			cond.Wait();
+			g_syscall_error->SetMsg((char*)"",NO_ERROR);
+			g_machine->WriteIntRegister(2,0);
+		}
 		break;
 	}
 	case SC_COND_SIGNAL:{
 		DEBUG('e', (char*)"Cond: Signal call.\n");
+		int cid;
+		Condition* cond;
+		cid = g_machine->ReadIntRegister(4);
+		cond = (Condition *)g_object_ids->SearchObject(cid);
+		if (cond && cond->type == CONDITION_TYPE)
+		{
+			cond.Signal();
+			g_syscall_error->SetMsg((char*)"",NO_ERROR);
+			g_machine->WriteIntRegister(2,0);
+		}
 		break;
 	}
 	case SC_COND_BROADCAST:{
 		DEBUG('e', (char*)"Cond: Broadcast call.\n");
+		int cid;
+		Condition* cond;
+		cid = g_machine->ReadIntRegister(4);
+		cond = (Condition *)g_object_ids->SearchObject(cid);
+		if (cond && cond->type == CONDITION_TYPE)
+		{
+			cond.Broadcast();
+			g_syscall_error->SetMsg((char*)"",NO_ERROR);
+			g_machine->WriteIntRegister(2,0);
+		}
 		break;
 	}
 #endif
