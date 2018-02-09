@@ -626,6 +626,61 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
 	  }
 	  break;
 	}
+	
+#ifdef ETUDIANTS_TP
+	case SC_SEM_CREATE:{
+		DEBUG('e', (char*)"Sem: Create call.\n");
+		break;
+	}
+	case SC_SEM_DESTROY:{
+		DEBUG('e', (char*)"Sem: Destroy call.\n");
+		break;
+	}
+	case SC_P:{
+		DEBUG('e', (char*)"Sem: P call.\n");
+		break;
+	}
+	case SC_V:{
+		DEBUG('e', (char*)"Sem: V call.\n");
+		break;
+	}
+	case SC_LOCK_CREATE:{
+		DEBUG('e', (char*)"Lock: Create call.\n");
+		break;
+	}
+	case SC_LOCK_DESTROY:{
+		DEBUG('e', (char*)"Lock: Destroy call.\n");
+		break;
+	}
+	case SC_LOCK_ACQUIRE:{
+		DEBUG('e', (char*)"Lock: Acquire call.\n");
+		break;
+	}
+	case SC_LOCK_RELEASE:{
+		DEBUG('e', (char*)"Lock: Release call.\n");
+		break;
+	}
+	case SC_COND_CREATE:{
+		DEBUG('e', (char*)"Cond: Create call.\n");
+		break;
+	}
+	case SC_COND_DESTROY:{
+		DEBUG('e', (char*)"Cond: Destroy call.\n");
+		break;
+	}
+	case SC_COND_WAIT:{
+		DEBUG('e', (char*)"Cond: Wait call.\n");
+		break;
+	}
+	case SC_COND_SIGNAL:{
+		DEBUG('e', (char*)"Cond: Signal call.\n");
+		break;
+	}
+	case SC_COND_BROADCAST:{
+		DEBUG('e', (char*)"Cond: Broadcast call.\n");
+		break;
+	}
+#endif
 
        default:
          printf("Invalid system call number : %d\n", type);
