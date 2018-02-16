@@ -36,8 +36,7 @@ extern void ThreadPrint(long arg);
 class Semaphore;
 class Process;
 
-/*! \brief Defines the context of the Nachos simulator
-*/
+/*! \brief Defines the context of the Nachos simulator */
 typedef struct {
   ucontext_t buf;
   int8_t *stackBottom;
@@ -45,11 +44,9 @@ typedef struct {
 } simulatorContextT;
 
 
-/*! \brief Defines the thread context (MIPS virtual machine)
-*/
+/*! \brief Defines the thread context (MIPS virtual machine) */
 typedef struct {
-  //! Integer CPU register state (value of
-  //  MIPS registers)
+  //! Integer CPU register state (value of MIPS registers)
   int32_t int_registers[NUM_INT_REGS];
 
   //! Floating point general purpose registers
@@ -60,9 +57,7 @@ typedef struct {
 } threadContextT;
 
 
-/*! \brief Data structures for managing threads  
- *  
- */
+/*! \brief Data structures for managing threads */
 class Thread {
 public:
   //! Build an empty thread
@@ -92,8 +87,7 @@ public:
   //! Sets-up the thread simulator context : fills it with the appropriate
   //  values such that the low-level context switch executes function
   //  StartThreadExecution.
-  void InitSimulatorContext(int8_t* stack_addr,
-			 unsigned long int stack_size);
+  void InitSimulatorContext(int8_t* stack_addr, unsigned long int stack_size);
 
   //! Initialize CPU registers,
   //  before jumping to user code

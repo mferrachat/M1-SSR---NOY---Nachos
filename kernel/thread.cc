@@ -99,12 +99,22 @@ Thread::~Thread()
 // \return NoError on success, an error code on error
 */
 //----------------------------------------------------------------------
-int Thread::Start(Process *owner,
-		  int32_t func, int arg)
+int Thread::Start(Process *owner, int32_t func, int arg)
 {
-  ASSERT(process == NULL);
-  printf("**** Warning: method Thread::Start is not implemented yet\n");
-  exit(-1);
+#ifndef ETUDIANTS_TP
+	ASSERT(process == NULL);
+	printf("**** Warning: method Thread::Start is not implemented yet\n");
+	exit(-1);
+#endif
+#ifdef ETUDIANTS_TP
+	process = owner;
+	process->numThreads++;
+	stackPointer = Process->addrspace->StackAllocate();
+	InitSimulatorContext(AllocBoundedArray(SIMULATORSTACKSIZE), SIMULATORSTACKSIZE);
+	InitThreadContext(func, stackPointer, arg);
+	g_alive->Append(this);
+	g_scheduler->ReadyToRun(this);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -116,13 +126,12 @@ int Thread::Start(Process *owner,
 //      \param arg argument to pass to the user thread
 */
 //----------------------------------------------------------------------
-void
-Thread::InitThreadContext(int32_t initialPCREG,int32_t initialSP, int32_t arg)
+void Thread::InitThreadContext(int32_t initialPCREG,int32_t initialSP, int32_t arg)
 {
     int i;
 
     for (i = 0; i < NUM_INT_REGS; i++)
-	thread_context.int_registers[i] = 0;
+		thread_context.int_registers[i] = 0;
 
     // Initial program counter -- must be location of "Start"
     thread_context.int_registers[PC_REG] = initialPCREG;
@@ -170,12 +179,9 @@ void StartThreadExecution(void) {
 //	
 //----------------------------------------------------------------------
 */
-void 
-Thread::InitSimulatorContext(int8_t* base_stack_addr,
-			  unsigned long int stack_size)
+void Thread::InitSimulatorContext(int8_t* base_stack_addr, unsigned long int stack_size)
 {
-  DEBUG('t', (char *)"Init simulator context \"%s\" with stack=%p\n",
-	name,  base_stack_addr);
+  DEBUG('t', (char *)"Init simulator context \"%s\" with stack=%p\n", name,  base_stack_addr);
 
   ASSERT(base_stack_addr != NULL);
 
@@ -207,8 +213,7 @@ Thread::InitSimulatorContext(int8_t* base_stack_addr,
 //	\param Idthread thread to wait for
 //----------------------------------------------------------------------
 */
-void 
-Thread::Join(Thread *Idthread)
+void Thread::Join(Thread *Idthread)
 { 
     while (g_alive->Search(Idthread)) Yield();
 }
@@ -253,16 +258,16 @@ Thread::CheckOverflow()
 void
 Thread::Finish ()
 {
+#ifndef ETUDIANTS_TP
+	DEBUG('t', (char *)"Finishing thread \"%s\"\n", GetName());
+	printf("**** Warning: method Thread::Finish is not fully implemented yet\n");
 
-    DEBUG('t', (char *)"Finishing thread \"%s\"\n", GetName());
- 
-    
-  printf("**** Warning: method Thread::Finish is not fully implemented yet\n");
-
-  // Go to sleep
-  Sleep();  // invokes SWITCH
-
- }
+	// Go to sleep
+	Sleep(); // invokes SWITCH
+#endif
+#ifdef ETUDIANTS_TP
+#endif
+}
 
 //----------------------------------------------------------------------
 // Thread::Yield
@@ -291,9 +296,10 @@ Thread::Yield ()
     DEBUG('t', (char *)"Yielding thread \"%s\"\n", GetName());
     
     nextThread = g_scheduler->FindNextToRun();
-    if (nextThread != NULL) {
-	g_scheduler->ReadyToRun(this);
-	g_scheduler->SwitchTo(nextThread);
+    if (nextThread != NULL)
+    {
+		g_scheduler->ReadyToRun(this);
+		g_scheduler->SwitchTo(nextThread);
     }
     (void) g_machine->interrupt->SetStatus(oldLevel);
 }
@@ -352,8 +358,18 @@ Thread::Sleep ()
 void
 Thread::SaveProcessorState()
 {
-  printf("**** Warning: method Thread::SaveProcessorState is not implemented yet\n");
-  exit(-1);
+#ifndef ETUDIANTS_TP
+	printf("**** Warning: method Thread::SaveProcessorState is not implemented yet\n");
+	exit(-1);
+#endif
+#ifdef ETUDIANTS_TP
+	int i;
+    for (i = 0; i < NUM_INT_REGS; i++)
+		thread_context.int_registers[i] = ReadIntRegister(i);
+	for (i = 0; i < NUM_FP_REGS; i++)
+		thread_context.float_registers[i] = ReadFPRegister(i);
+	thread_context.cc = ReadCC();
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -365,8 +381,18 @@ Thread::SaveProcessorState()
 void
 Thread::RestoreProcessorState()
 {
-  printf("**** Warning: method Thread::RestoreProcessorState is not implemented yet\n");
-  exit(-1);
+#ifndef ETUDIANTS_TP
+	printf("**** Warning: method Thread::RestoreProcessorState is not implemented yet\n");
+	exit(-1);
+#endif
+#ifdef ETUDIANTS_TP
+	int i;
+    for (i = 0; i < NUM_INT_REGS; i++)
+		WriteIntRegister(thread_context.int_registers[i]);
+	for (i = 0; i < NUM_FP_REGS; i++)
+		WriteFPRegister(thread_context.float_registers[i]);
+	WriteCC(thread_context.cc);
+#endif
 }
 
 //----------------------------------------------------------------------
