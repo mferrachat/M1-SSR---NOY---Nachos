@@ -52,11 +52,9 @@ main(int argc, char **argv)
 {
   int argCount; // Number of arguments for a particular command
   int err;      // Error code
-
   // Init Nachos data structures
   Initialize(argc, argv);
   char * startfilename = g_cfg->ProgramToRun;
-
   // Process command line arguments
   for (argc--, argv++; argc > 0; argc -= argCount, argv += argCount) {
     argCount = 1;

@@ -188,20 +188,25 @@ Initialize(int argc, char **argv)
 	g_current_thread = new Thread((char*)"main-temp");
 	errStatus = g_current_thread->Start(rootProcess, 0x0, -1);
 	if(errStatus != NO_ERROR)
+	{
 		exit(-1);
+	}
 
 	// Remove g_current_thread from ready list (inserted by default)
 	// because it is currently executing
 	ASSERT(g_current_thread == g_scheduler->FindNextToRun());
+	printf("Init1\n");
 
 	// Enable interrupts
 	g_machine->interrupt->SetStatus(INTERRUPTS_ON);
+	printf("Init2\n");
 
 	// Init the Nachos file system
 	// NB: uses the disk, so blocks the calling thread.
 	// Thus; FileSystem initiaization has to be done after the first
 	// (temporary) thread is created
 	g_file_system = new FileSystem(g_cfg->FormatDisk);
+	printf("Init\n");
 }
 
 //----------------------------------------------------------------------

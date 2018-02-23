@@ -83,8 +83,7 @@ Thread * Scheduler::FindNextToRun()
 //	\param nextThread is the thread to be put into the CPU.
 */
 //----------------------------------------------------------------------
-void
-Scheduler::SwitchTo(Thread *nextThread)
+void Scheduler::SwitchTo(Thread *nextThread)
 {
 	Thread *oldThread = g_current_thread;
 

@@ -114,6 +114,7 @@ int Thread::Start(Process *owner, int32_t func, int arg)
 	InitThreadContext(func, stackPointer, arg);
 	g_alive->Append(this);
 	g_scheduler->ReadyToRun(this);
+	return NO_ERROR;
 #endif
 }
 
@@ -395,6 +396,7 @@ Thread::RestoreProcessorState()
 	for (i = 0; i < NUM_FP_REGS; i++)
 		g_machine->WriteFPRegister(i, thread_context.float_registers[i]);
 	g_machine->WriteCC(thread_context.cc);
+	
 #endif
 }
 
