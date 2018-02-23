@@ -84,7 +84,7 @@ Thread * Scheduler::FindNextToRun()
 */
 //----------------------------------------------------------------------
 void
-Scheduler::SwitchTo (Thread *nextThread)
+Scheduler::SwitchTo(Thread *nextThread)
 {
 	Thread *oldThread = g_current_thread;
 
@@ -116,6 +116,11 @@ Scheduler::SwitchTo (Thread *nextThread)
 	// we need to delete its carcass.  Note we cannot delete the thread
 	// before now (for example, in Thread::Finish()), because up to this
 	// point, we were still running on the old thread's stack!
+	if(g_thread_to_be_destroyed != NULL)
+	{
+		g_alive->RemoveItem(g_thread_to_be_destroyed);
+		delete g_thread_to_be_destroyed;
+	}
 }
 
 //----------------------------------------------------------------------

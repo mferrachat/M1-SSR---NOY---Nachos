@@ -111,7 +111,7 @@ void Semaphore::V()
 	g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
 	++value;
 	if(!queue->IsEmpty())
-		g_scheduler->ReadyToRun((Thread) queue->Remove());
+		g_scheduler->ReadyToRun((Thread*) queue->Remove());
 	else
 		g_machine->interrupt->Idle();
 	g_machine->interrupt->SetStatus(INTERRUPTS_ON);
@@ -209,7 +209,7 @@ void Lock::Release()
 		}
 		else
 		{
-			owner = sleepqueue->Remove();
+			owner = (Thread*) sleepqueue->Remove();
 			g_scheduler->ReadyToRun(owner);
 		}
 		g_machine->interrupt->SetStatus(INTERRUPTS_ON);
@@ -289,7 +289,7 @@ void Condition::Signal()
 #ifdef ETUDIANTS_TP
 	g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
 	if(!waitqueue->IsEmpty())
-		g_scheduler->ReadyToRun((Thread) waitqueue->Remove());
+		g_scheduler->ReadyToRun((Thread*) waitqueue->Remove());
 	g_machine->interrupt->SetStatus(INTERRUPTS_ON);
 #endif
 }
@@ -309,7 +309,7 @@ void Condition::Broadcast()
 #ifdef ETUDIANTS_TP
 	g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
 	while(!waitqueue->IsEmpty())
-		g_scheduler->ReadyToRun((Thread) waitqueue->Remove());
+		g_scheduler->ReadyToRun((Thread*) waitqueue->Remove());
 	g_machine->interrupt->SetStatus(INTERRUPTS_ON);
 #endif
 }

@@ -713,7 +713,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
 					sem = (Semaphore *)g_object_ids->SearchObject(sid);
 					if (sem && sem->type == SEMAPHORE_TYPE)
 					{
-						sem.P();
+						sem->P();
 						g_syscall_error->SetMsg((char*)"",NO_ERROR);
 						g_machine->WriteIntRegister(2,0);
 					}
@@ -728,7 +728,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
 					sem = (Semaphore *)g_object_ids->SearchObject(sid);
 					if (sem && sem->type == SEMAPHORE_TYPE)
 					{
-						sem.V();
+						sem->V();
 						g_syscall_error->SetMsg((char*)"",NO_ERROR);
 						g_machine->WriteIntRegister(2,0);
 					}
@@ -772,7 +772,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
 					lock = (Lock *)g_object_ids->SearchObject(lid);
 					if (lock && lock->type == LOCK_TYPE)
 					{
-						lock.Acquire();
+						lock->Acquire();
 						g_syscall_error->SetMsg((char*)"",NO_ERROR);
 						g_machine->WriteIntRegister(2,0);
 					}
@@ -787,7 +787,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
 					lock = (Lock *)g_object_ids->SearchObject(lid);
 					if (lock && lock->type == LOCK_TYPE)
 					{
-						lock.Release();
+						lock->Release();
 						g_syscall_error->SetMsg((char*)"",NO_ERROR);
 						g_machine->WriteIntRegister(2,0);
 					}
@@ -831,7 +831,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
 					cond = (Condition *)g_object_ids->SearchObject(cid);
 					if (cond && cond->type == CONDITION_TYPE)
 					{
-						cond.Wait();
+						cond->Wait();
 						g_syscall_error->SetMsg((char*)"",NO_ERROR);
 						g_machine->WriteIntRegister(2,0);
 					}
@@ -846,7 +846,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
 					cond = (Condition *)g_object_ids->SearchObject(cid);
 					if (cond && cond->type == CONDITION_TYPE)
 					{
-						cond.Signal();
+						cond->Signal();
 						g_syscall_error->SetMsg((char*)"",NO_ERROR);
 						g_machine->WriteIntRegister(2,0);
 					}
@@ -861,7 +861,7 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
 					cond = (Condition *)g_object_ids->SearchObject(cid);
 					if (cond && cond->type == CONDITION_TYPE)
 					{
-						cond.Broadcast();
+						cond->Broadcast();
 						g_syscall_error->SetMsg((char*)"",NO_ERROR);
 						g_machine->WriteIntRegister(2,0);
 					}

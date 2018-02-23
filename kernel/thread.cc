@@ -109,7 +109,7 @@ int Thread::Start(Process *owner, int32_t func, int arg)
 #ifdef ETUDIANTS_TP
 	process = owner;
 	process->numThreads++;
-	stackPointer = Process->addrspace->StackAllocate();
+	stackPointer = process->addrspace->StackAllocate();
 	InitSimulatorContext(AllocBoundedArray(SIMULATORSTACKSIZE), SIMULATORSTACKSIZE);
 	InitThreadContext(func, stackPointer, arg);
 	g_alive->Append(this);
@@ -256,7 +256,7 @@ Thread::CheckOverflow()
 */
 //----------------------------------------------------------------------
 void
-Thread::Finish ()
+Thread::Finish()
 {
 #ifndef ETUDIANTS_TP
 	DEBUG('t', (char *)"Finishing thread \"%s\"\n", GetName());
@@ -266,6 +266,9 @@ Thread::Finish ()
 	Sleep(); // invokes SWITCH
 #endif
 #ifdef ETUDIANTS_TP
+	g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
+	g_thread_to_be_destroyed = this;
+	Sleep();
 #endif
 }
 
@@ -286,7 +289,7 @@ Thread::Finish ()
 */
 //----------------------------------------------------------------------
 void
-Thread::Yield ()
+Thread::Yield()
 {
     Thread *nextThread;
     IntStatus oldLevel = g_machine->interrupt->SetStatus(INTERRUPTS_OFF);
@@ -325,7 +328,7 @@ Thread::Yield ()
 */
 //----------------------------------------------------------------------
 void
-Thread::Sleep ()
+Thread::Sleep()
 {
     Thread *nextThread;
     
@@ -342,8 +345,8 @@ Thread::Sleep ()
     // set to the thread which is put to sleep, which is weird and
     // would need to be fixed
     while ((nextThread = g_scheduler->FindNextToRun()) == NULL) {
-	DEBUG('t', (char *)"Nobody to run => idle\n");
-	g_machine->interrupt->Idle();	// no one to run, wait for an interrupt
+		DEBUG('t', (char *)"Nobody to run => idle\n");
+		g_machine->interrupt->Idle();	// no one to run, wait for an interrupt
     }
 
     // Once we have another thread to execute, perform the context switch
@@ -365,10 +368,10 @@ Thread::SaveProcessorState()
 #ifdef ETUDIANTS_TP
 	int i;
     for (i = 0; i < NUM_INT_REGS; i++)
-		thread_context.int_registers[i] = ReadIntRegister(i);
+		thread_context.int_registers[i] = g_machine->ReadIntRegister(i);
 	for (i = 0; i < NUM_FP_REGS; i++)
-		thread_context.float_registers[i] = ReadFPRegister(i);
-	thread_context.cc = ReadCC();
+		thread_context.float_registers[i] = g_machine->ReadFPRegister(i);
+	thread_context.cc = g_machine->ReadCC();
 #endif
 }
 
@@ -388,10 +391,10 @@ Thread::RestoreProcessorState()
 #ifdef ETUDIANTS_TP
 	int i;
     for (i = 0; i < NUM_INT_REGS; i++)
-		WriteIntRegister(thread_context.int_registers[i]);
+		g_machine->WriteIntRegister(i, thread_context.int_registers[i]);
 	for (i = 0; i < NUM_FP_REGS; i++)
-		WriteFPRegister(thread_context.float_registers[i]);
-	WriteCC(thread_context.cc);
+		g_machine->WriteFPRegister(i, thread_context.float_registers[i]);
+	g_machine->WriteCC(thread_context.cc);
 #endif
 }
 
