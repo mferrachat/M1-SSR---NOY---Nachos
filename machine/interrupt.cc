@@ -225,8 +225,7 @@ Interrupt::Idle()
 //      Exits with an error code that corresponds to the execution
 //         of the user process
 //----------------------------------------------------------------------
-void
-Interrupt::Halt(int errorcode)
+void Interrupt::Halt(int errorcode)
 {
     printf("Machine halting!\n\n");
     Cleanup();
@@ -250,8 +249,7 @@ Interrupt::Halt(int errorcode)
 //	\param type is the hardware device that generated the interrupt
 */
 //----------------------------------------------------------------------
-void
-Interrupt::Schedule(VoidFunctionPtr handler, int64_t arg, int fromNow, IntType type)
+void Interrupt::Schedule(VoidFunctionPtr handler, int64_t arg, int fromNow, IntType type)
 {
     Time when;
     when = g_stats->getTotalTicks() + fromNow;
@@ -279,8 +277,7 @@ Interrupt::Schedule(VoidFunctionPtr handler, int64_t arg, int fromNow, IntType t
 //		we're done!
 */
 //----------------------------------------------------------------------
-bool
-Interrupt::CheckIfDue(bool advanceClock)
+bool Interrupt::CheckIfDue(bool advanceClock)
 {
   MachineStatus old = g_machine->GetStatus();
   Time when;
@@ -335,8 +332,7 @@ Interrupt::CheckIfDue(bool advanceClock)
 */
 //----------------------------------------------------------------------
 
-static void
-PrintPending(int64_t arg)
+static void PrintPending(int64_t arg)
 {
     PendingInterrupt *pend = (PendingInterrupt *)arg;
 
@@ -350,8 +346,7 @@ PrintPending(int64_t arg)
 //	that are scheduled to occur in the future.
 */
 //----------------------------------------------------------------------
-void
-Interrupt::DumpState()
+void Interrupt::DumpState()
 {
     printf("Pending interrupts:\n");
     fflush(stdout);

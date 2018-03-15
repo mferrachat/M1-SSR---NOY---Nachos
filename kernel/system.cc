@@ -195,11 +195,9 @@ Initialize(int argc, char **argv)
 	// Remove g_current_thread from ready list (inserted by default)
 	// because it is currently executing
 	ASSERT(g_current_thread == g_scheduler->FindNextToRun());
-	printf("Init1\n");
 
 	// Enable interrupts
 	g_machine->interrupt->SetStatus(INTERRUPTS_ON);
-	printf("Init2\n");
 
 	// Init the Nachos file system
 	// NB: uses the disk, so blocks the calling thread.
