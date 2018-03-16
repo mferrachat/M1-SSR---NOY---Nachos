@@ -106,7 +106,8 @@ Interrupt::ChangeLevel(IntStatus old, IntStatus now)
 //  \param now the new interrupt status
 */
 //----------------------------------------------------------------------
-IntStatus Interrupt::SetStatus(IntStatus now)
+IntStatus
+Interrupt::SetStatus(IntStatus now)
 {
     IntStatus old = level;
     
@@ -225,7 +226,8 @@ Interrupt::Idle()
 //      Exits with an error code that corresponds to the execution
 //         of the user process
 //----------------------------------------------------------------------
-void Interrupt::Halt(int errorcode)
+void
+Interrupt::Halt(int errorcode)
 {
     printf("Machine halting!\n\n");
     Cleanup();
@@ -249,7 +251,8 @@ void Interrupt::Halt(int errorcode)
 //	\param type is the hardware device that generated the interrupt
 */
 //----------------------------------------------------------------------
-void Interrupt::Schedule(VoidFunctionPtr handler, int64_t arg, int fromNow, IntType type)
+void
+Interrupt::Schedule(VoidFunctionPtr handler, int64_t arg, int fromNow, IntType type)
 {
     Time when;
     when = g_stats->getTotalTicks() + fromNow;
@@ -277,7 +280,8 @@ void Interrupt::Schedule(VoidFunctionPtr handler, int64_t arg, int fromNow, IntT
 //		we're done!
 */
 //----------------------------------------------------------------------
-bool Interrupt::CheckIfDue(bool advanceClock)
+bool
+Interrupt::CheckIfDue(bool advanceClock)
 {
   MachineStatus old = g_machine->GetStatus();
   Time when;
@@ -332,7 +336,8 @@ bool Interrupt::CheckIfDue(bool advanceClock)
 */
 //----------------------------------------------------------------------
 
-static void PrintPending(int64_t arg)
+static void
+PrintPending(int64_t arg)
 {
     PendingInterrupt *pend = (PendingInterrupt *)arg;
 
@@ -346,7 +351,8 @@ static void PrintPending(int64_t arg)
 //	that are scheduled to occur in the future.
 */
 //----------------------------------------------------------------------
-void Interrupt::DumpState()
+void
+Interrupt::DumpState()
 {
     printf("Pending interrupts:\n");
     fflush(stdout);
