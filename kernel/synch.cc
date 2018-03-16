@@ -118,7 +118,7 @@ Semaphore::V() {
     DEBUG('s', (char *)"[%s] V(%s) --> %d (avant V)\n", g_current_thread -> GetName(), this -> name, this -> value);
     this -> value += 1;
     DEBUG('s', (char *)"[%s] V(%s) --> %d (après V)\n", g_current_thread -> GetName(), this -> name, this -> value);
-    if (!(this -> queue -> IsEmpty()) && this -> value >= 0) {
+    if (!queue->IsEmpty()) {
       Thread* thread_R2R = (Thread*)(this -> queue -> Remove());
       g_scheduler -> ReadyToRun(thread_R2R);
     }
