@@ -42,18 +42,19 @@ DriverACIA::DriverACIA()
 	exit(-1);
 #endif
 #ifdef ETUDIANTS_TP
+	send_sema = new Semaphore("acia_send_sema",1);
 	if(g_cfg->ACIA == ACIA_INTERRUPT)
 	{
 		ind_rec = 0;
-		send_sema = new Semaphore("acia_send_sema",1);
-		receive_sema = new Semaphore("acia_receive_sema",1);
-		g_machine->acia->SetWorkingMonde(SEND_INTERRUPT | REC_INTERRUPT);
+		
+		receive_sema = new Semaphore("acia_receive_sema",0);
+		g_machine->acia->SetWorkingMode(SEND_INTERRUPT | REC_INTERRUPT);
 	}
 	else if(g_cfg->ACIA == ACIA_BUSY_WAITING)
 	{
-		g_machine->acia->SetWorkingMonde(BUSY_WAITING);
-		send_sema = new Semaphore("acia_send_sema",1);
+		ind_send = 0;
 		receive_sema = new Semaphore("acia_receive_sema",1);
+		g_machine->acia->SetWorkingMode(BUSY_WAITING);
 	}
 #endif
 }
@@ -72,25 +73,36 @@ int DriverACIA::TtySend(char* buff)
 	return 0;
 #endif
 #ifdef ETUDIANTS_TP
+	send_sema->P();
+	ind_send = 0;
+
 	if(g_cfg->ACIA == ACIA_INTERRUPT)
 	{
-		//todo later
+		do
+		{
+			c = buff[ind_send];
+			send_buffer[ind_send] = c;
+			ind_send++;
+		}
+		while(c != '\00');
+
+		// TODO : autoriser les interruptions
 	}
 	else if(g_cfg->ACIA == ACIA_BUSY_WAITING)
 	{
-		P(send_sema);
-		ind_send = 0;
+		char c;
 		do
 		{
-			char c = buff[ind_send];
-			ind_send++;
+			while(!(g_machine->acia->GetOutputStateReg() == EMPTY));
+			c = buff[ind_send];
 			g_machine->acia->PutChar(c);
-			while(!(g_machine->acia->GetOuputStateReg() == EMPTY));
+			ind_send++;
 		}
 		while(c != '\00');
-		V(send_sema);
-		return ind_send;
+
+		send_sema->V();
 	}
+	return ind_send;
 #endif
 }
 
@@ -109,20 +121,35 @@ int DriverACIA::TtyReceive(char* buff,int lg)
 	return 0;
 #endif
 #ifdef ETUDIANTS_TP
+	receive_sema->P();
+	ind_rec = 0;
+
 	if(g_cfg->ACIA == ACIA_INTERRUPT)
 	{
-		//todo later
+		do
+		{
+			char c = receive_buffer[ind_rec];
+			buff[ind_rec] = c;
+			ind_rec++;
+		}
+
+		// ??
 	}
 	else if(g_cfg->ACIA == ACIA_BUSY_WAITING)
 	{
-		char c = g_machine->acia->GetChar();
-		
-	
-	
-		//GetChar
-		//ind_rec
-		//GetInputStateReg()
+		do
+		{
+			while((g_machine->acia->GetInputStateReg() == EMPTY));
+			char c = g_machine->acia->GetChar();
+			buff[ind_rec] = c;
+			ind_rec++;
+		}
+		while(c != '\00');
+
+		receive_sema->V();
+		return ind_rec;
 	}
+	return 0;
 #endif
 }
 
@@ -142,6 +169,13 @@ void DriverACIA::InterruptSend()
 	exit(-1);
 #endif
 #ifdef ETUDIANTS_TP
+	if (send_buffer[ind_send-1] == '\0'){
+		send_sema->V();
+	}
+	else{
+		g_machine->acia->PutChar(send_buffer[ind_send]);
+		ind_send++;
+	}
 #endif
 }
 
@@ -162,5 +196,13 @@ void DriverACIA::InterruptReceive()
 	exit(-1);
 #endif
 #ifdef ETUDIANTS_TP
+	char c = g_machine->acia->GetChar();
+	if(c == '\0'){
+		receive_sema->V();
+	}
+	else{
+		receive_buffer[ind_rec] = c;
+		ind_rec++;
+	}
 #endif
 }
