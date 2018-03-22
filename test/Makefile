@@ -5,7 +5,7 @@
 #
 # To add generate a new program, just update the PROGRAMS target below
 
-PROGRAMS = halt hello shell matmult sort synch
+PROGRAMS = halt hello shell matmult sort synch consommateur emetteur
 
 all: $(PROGRAMS)
 
