@@ -40,3 +40,5 @@ test/hello
 test/matmult
 test/shell
 test/sort
+
+Makefile.config

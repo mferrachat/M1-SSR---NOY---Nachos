@@ -131,8 +131,7 @@ void
 ACIA_sysdep::SendChar()
 {
   interface->outputStateRegister = FULL;
-  g_machine->interrupt->Schedule(DummyInterruptEm,(int64_t)this,
-    nano_to_cycles(SEND_TIME,g_cfg->ProcessorFrequency),ACIA_SEND_INT);
+  g_machine->interrupt->Schedule(DummyInterruptEm,(int64_t)this,nano_to_cycles(SEND_TIME,g_cfg->ProcessorFrequency),ACIA_SEND_INT);
 };
 
 
