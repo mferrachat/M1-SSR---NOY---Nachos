@@ -407,6 +407,7 @@ Thread::RestoreProcessorState()
       g_machine -> WriteFPRegister(i, this -> thread_context.float_registers[i]);
     }
     g_machine -> WriteCC(this -> thread_context.cc);
+    g_machine->mmu->translationTable = this->process->addrspace->translationTable;
   #endif
   #ifndef ETUDIANTS_TP
     printf("**** Warning: method Thread::RestoreProcessorState is not implemented yet\n");
