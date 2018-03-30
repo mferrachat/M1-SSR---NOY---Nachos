@@ -41,9 +41,13 @@ PageFaultManager::~PageFaultManager() {
 */  
 ExceptionType PageFaultManager::PageFault(uint32_t virtualPage) 
 {
-  printf("**** Warning: page fault manager is not implemented yet\n");
-    exit(-1);
-    return ((ExceptionType)0);
+#ifdef ETUDIANTS_TP
+#endif
+#ifndef ETUDIANTS_TP
+	printf("**** Warning: page fault manager is not implemented yet\n");
+	exit(-1);
+	return ((ExceptionType)0);
+#endif
 }
 
 
