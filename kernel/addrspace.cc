@@ -208,9 +208,13 @@ AddrSpace::AddrSpace(OpenFile * exec_file, Process *p, int *err)
 	  // later-on will be saved in the swap disk. We have to indicate this
 	  // in the translation table
 	  translationTable->setAddrDisk(virt_page,-1);
-
-	  // The entry is valid
-	  translationTable->setBitValid(virt_page);
+#ifdef ETUDIANTS_TP
+	translationTable->clearBitValid(virt_page);
+#endif
+#ifndef ETUDIANTS_TP
+	// The entry is valid
+	translationTable->setBitValid(virt_page);
+#endif
 	  
 	  /* End of code without demand paging */
 	}
@@ -284,30 +288,37 @@ int AddrSpace::StackAllocate(void)
 	stackBasePage*g_cfg->PageSize,
 	(stackBasePage+numPages)*g_cfg->PageSize);
 
-  for (int i = stackBasePage ; i < (stackBasePage + numPages) ; i++) {
-    /* Without demand paging */
+	for (int i = stackBasePage; i < (stackBasePage + numPages); i++)
+	{
+		/* Without demand paging */
 
-    // Allocate a new physical page for the stack, halt if not page availabke
-    int pp = g_physical_mem_manager->FindFreePage();
-    if (pp == -1) { 
-      printf("Not enough free space to load stack\n");
-      g_machine->interrupt->Halt(-1);
-    }
-    g_physical_mem_manager->tpr[pp].virtualPage=i;
-    g_physical_mem_manager->tpr[pp].owner = this;
-    g_physical_mem_manager->tpr[pp].locked=true;
-    translationTable->setPhysicalPage(i,pp);
+		// Allocate a new physical page for the stack, halt if not page availabke
+		int pp = g_physical_mem_manager->FindFreePage();
+		if (pp == -1)
+		{
+			printf("Not enough free space to load stack\n");
+			g_machine->interrupt->Halt(-1);
+		}
+		g_physical_mem_manager->tpr[pp].virtualPage=i;
+		g_physical_mem_manager->tpr[pp].owner = this;
+		g_physical_mem_manager->tpr[pp].locked=true;
+		translationTable->setPhysicalPage(i,pp);
 
-    // Fill the page with zeroes
-    memset(&(g_machine->mainMemory[translationTable->getPhysicalPage(i)*g_cfg->PageSize]),
-	   0x0,g_cfg->PageSize);
-    translationTable->setAddrDisk(i,-1);
-    translationTable->setBitValid(i);
-    translationTable->clearBitSwap(i);
-    translationTable->setBitReadAllowed(i);
-    translationTable->setBitWriteAllowed(i);
-    translationTable->clearBitIo(i);
-    /* End of code without demand paging */
+		// Fill the page with zeroes
+		memset(&(g_machine->mainMemory[translationTable->getPhysicalPage(i)*g_cfg->PageSize]),
+		0x0,g_cfg->PageSize);
+		translationTable->setAddrDisk(i,-1);
+#ifdef ETUDIANTS_TP
+		translationTable->clearBitValid(i);
+#endif
+#ifndef ETUDIANTS_TP
+		translationTable->setBitValid(i);
+#endif
+		translationTable->clearBitSwap(i);
+		translationTable->setBitReadAllowed(i);
+		translationTable->setBitWriteAllowed(i);
+		translationTable->clearBitIo(i);
+		/* End of code without demand paging */
     }
 
   int stackpointer = (stackBasePage+numPages)*g_cfg->PageSize - 4*sizeof(int);
