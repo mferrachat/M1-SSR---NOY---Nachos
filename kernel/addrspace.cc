@@ -189,7 +189,7 @@ AddrSpace::AddrSpace(OpenFile * exec_file, Process *p, int *err)
 				memset(&(g_machine->mainMemory[translationTable->getPhysicalPage(virt_page)*g_cfg->PageSize]), 0, g_cfg->PageSize);
 			}
 
-			// The page has been loded in physical memory but
+			// The page has been loaded in physical memory but
 			// later-on will be saved in the swap disk. We have to indicate this
 			// in the translation table
 			translationTable->setAddrDisk(virt_page,-1);
@@ -197,7 +197,11 @@ AddrSpace::AddrSpace(OpenFile * exec_file, Process *p, int *err)
 #ifdef ETUDIANTS_TP
 			if (section_table[i].sh_type != SHT_NOBITS)
 			{
-				translationTable->setAddrDisk(virt_page,(char *)&(g_machine->mainMemory[translationTable->getPhysicalPage(virt_page)*g_cfg->PageSize]));
+				translationTable->setAddrDisk(virt_page, section_table[i].sh_offset + pgdisk*g_cfg->PageSize);
+			}
+			else
+			{
+				translationTable->setAddrDisk(virt_page,-1);
 			}
 			translationTable->clearBitValid(virt_page);
 #endif
@@ -279,6 +283,7 @@ int AddrSpace::StackAllocate(void)
 
 	for (int i = stackBasePage; i < (stackBasePage + numPages); i++)
 	{
+#ifndef ETUDIANTS_TP
 		/* Without demand paging */
 
 		// Allocate a new physical page for the stack, halt if not page availabke
@@ -289,25 +294,24 @@ int AddrSpace::StackAllocate(void)
 			g_machine->interrupt->Halt(-1);
 		}
 		g_physical_mem_manager->tpr[pp].virtualPage=i;
-		g_physical_mem_manager->tpr[pp].owner = this;
-		g_physical_mem_manager->tpr[pp].locked=true;
+		g_physical_mem_manager->tpr[pp].owner  = this;
+		g_physical_mem_manager->tpr[pp].locked = true;
 		translationTable->setPhysicalPage(i,pp);
 
 		// Fill the page with zeroes
 		memset(&(g_machine->mainMemory[translationTable->getPhysicalPage(i)*g_cfg->PageSize]),
 		0x0,g_cfg->PageSize);
-		translationTable->setAddrDisk(i,-1);
+		translationTable->setBitValid(i);
+		/* End of code without demand paging */
+#endif
 #ifdef ETUDIANTS_TP
 		translationTable->clearBitValid(i);
 #endif
-#ifndef ETUDIANTS_TP
-		translationTable->setBitValid(i);
-#endif
+		translationTable->setAddrDisk(i,-1);
 		translationTable->clearBitSwap(i);
 		translationTable->setBitReadAllowed(i);
 		translationTable->setBitWriteAllowed(i);
 		translationTable->clearBitIo(i);
-		/* End of code without demand paging */
     }
 
   int stackpointer = (stackBasePage+numPages)*g_cfg->PageSize - 4*sizeof(int);
