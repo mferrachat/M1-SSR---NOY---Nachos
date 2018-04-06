@@ -42,6 +42,52 @@ PageFaultManager::~PageFaultManager() {
 ExceptionType PageFaultManager::PageFault(uint32_t virtualPage) 
 {
 #ifdef ETUDIANTS_TP
+	TranslationTable *tt = g_machine->mmu->translationTable;
+	
+	while(tt->getBitIo(virtualPage))
+	{
+		g_current_thread->Yield();
+	}
+	
+	if(!tt->getBitValid(virtualPage))
+	{
+	
+		tt->setBitIo(virtualPage);
+		int addrDisk = tt->getAddrDisk(virtualPage);
+		//char jean_charles_tableau[g_cfg->PageSize];
+	
+		int physPage = g_physical_mem_manager->AddPhysicalToVirtualMapping(g_current_thread->GetProcessOwner()->addrspace, virtualPage);
+		tt->setPhysicalPage(virtualPage,physPage);
+	
+		if(tt->getBitSwap(virtualPage) == 1)
+		{
+			while(addrDisk == -1)
+			{
+				g_current_thread->Yield();
+				addrDisk = tt->getAddrDisk(virtualPage);
+			}
+			
+			g_swap_manager->GetPageSwap(addrDisk, (char *)&(g_machine->mainMemory[tt->getPhysicalPage(virtualPage)*g_cfg->PageSize]));
+		}
+		else
+		{
+			if(addrDisk == -1)
+			{
+				memset(&(g_machine->mainMemory[tt->getPhysicalPage(virtualPage)*g_cfg->PageSize]), 0, g_cfg->PageSize);
+			}
+			else
+			{
+				g_current_thread->GetProcessOwner()->exec_file->ReadAt((char *)&(g_machine->mainMemory[tt->getPhysicalPage(virtualPage)*g_cfg->PageSize]), g_cfg->PageSize, addrDisk);
+			}
+		}
+		
+		tt->clearBitIo(virtualPage);
+		tt->setBitValid(virtualPage);
+		
+		g_physical_mem_manager->UnlockPage(physPage);
+	}	
+	
+	return NO_EXCEPTION;
 #endif
 #ifndef ETUDIANTS_TP
 	printf("**** Warning: page fault manager is not implemented yet\n");
