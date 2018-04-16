@@ -181,27 +181,40 @@ int PhysicalMemManager::FindFreePage() {
 int PhysicalMemManager::EvictPage()
 {
 #ifdef ETUDIANTS_TP
-	int page = 0;
+	int local_i_clock = 0;
+  bool found = false;
   bool allLocked = true;
-  while(1)
+
+  tpr_c pPhys = tpr[local_i_clock];
+  int pVirt = pPhys.virtualPage;
+  translationTable *tt = pPhys.owner->translationTable;
+
+  while(!found)
   {
-    if(!g_machine->mmu->translationTable->getBitU(tpr[page].virtualPage) && tpr[page].locked == false)
+    if(!tt->getBitU(pVirt) && pPhys.locked == false)
     {
-      if(g_machine->mmu->translationTable->getBitM(tpr[page].virtualPage))
-      {
-        //copier page sur disque
-      }
-      return page;
+      found = true;
     }
-    g_machine->mmu->translationTable->clearBitU(tpr[page].virtualPage);
+    tt->clearBitU(pVirt);
 
     // If all pages are locked, suspend current thread
-    if(tpr[page].locked == false)
+    if(pPhys.locked == false)
       allLocked = false;
-    if((page == g_cfg->NumPhysPages-1) && allLocked)
+    if((local_i_clock == g_cfg->NumPhysPages-1) && allLocked)
       g_current_thread->Yield();
 
-    page = (page+1)%(g_cfg->NumPhysPages-1);
+    local_i_clock = (local_i_clock+1)%(g_cfg->NumPhysPages-1);
+  }
+
+  i_clock = local_i_clock;
+  pPhys.locked = true;
+
+  if(tt->getBitM(pVirt))
+  {
+    // bordel avec swap
+    
+
+    return local_i_clock;
   }
 #endif
 #ifndef ETUDIANTS_TP
