@@ -181,7 +181,28 @@ int PhysicalMemManager::FindFreePage() {
 int PhysicalMemManager::EvictPage()
 {
 #ifdef ETUDIANTS_TP
-	
+	int page = 0;
+  bool allLocked = true;
+  while(1)
+  {
+    if(!g_machine->mmu->translationTable->getBitU(tpr[page].virtualPage) && tpr[page].locked == false)
+    {
+      if(g_machine->mmu->translationTable->getBitM(tpr[page].virtualPage))
+      {
+        //copier page sur disque
+      }
+      return page;
+    }
+    g_machine->mmu->translationTable->clearBitU(tpr[page].virtualPage);
+
+    // If all pages are locked, suspend current thread
+    if(tpr[page].locked == false)
+      allLocked = false;
+    if((page == g_cfg->NumPhysPages-1) && allLocked)
+      g_current_thread->Yield();
+
+    page = (page+1)%(g_cfg->NumPhysPages-1);
+  }
 #endif
 #ifndef ETUDIANTS_TP
 	printf("**** Warning: page replacement algorithm is not implemented yet\n");
