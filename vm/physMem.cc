@@ -213,9 +213,8 @@ int PhysicalMemManager::EvictPage()
   {
     // bordel avec swap
     
-
-    return local_i_clock;
   }
+  return local_i_clock;
 #endif
 #ifndef ETUDIANTS_TP
 	printf("**** Warning: page replacement algorithm is not implemented yet\n");
