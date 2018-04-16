@@ -186,7 +186,8 @@ int PhysicalMemManager::EvictPage()
   bool found = false;
   tpr_c pPhys;
   int pVirt;
-  translationTable *tt;
+  TranslationTable *tt;
+  int secteur;
 
   while(!found)
   {
@@ -209,17 +210,22 @@ int PhysicalMemManager::EvictPage()
       count = 0;
     }
 
-    local_i_clock = (local_i_clock+1)%(g_cfg->NumPhysPages-1);
-    count = count + 1;
+    if(!found)
+    {
+      local_i_clock = (local_i_clock+1)%(g_cfg->NumPhysPages-1);
+      count = count + 1;
+    }
   }
 
-  i_clock = local_i_clock-1;
+  i_clock = local_i_clock;
   pPhys.locked = true;
 
+  // If page has been modified, put it in swap
   if(tt->getBitM(pVirt))
   {
-    // bordel avec swap
-    
+    secteur = g_swap_manager->PutPageSwap(-1, (char*)g_machine->mainMemory[local_i_clock*g_cfg->PageSize]);
+    tt->setAddrDisk(pVirt,secteur);
+    tt->setBitSwap(pVirt);
   }
   return local_i_clock;
 #endif
