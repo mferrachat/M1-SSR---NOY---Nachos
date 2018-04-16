@@ -736,6 +736,14 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
             }
             break;
           }
+
+          case SC_MMAP: {
+            DEBUG('e', (char*)"MMAP call.\n");
+            int arg;
+            arg = g_machine->ReadIntRegister(4);
+            // todo
+          }
+
         #endif
 
         case SC_REMOVE: {

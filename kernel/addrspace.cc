@@ -356,8 +356,13 @@ int AddrSpace::Alloc(int numPages)
 // ----------------------------------------------------------------------
 int AddrSpace::Mmap(OpenFile *f, int size)
 {
+#ifdef ETUDIANTS_TP
+	
+#endif
+#ifndef ETUDIANTS_TP
   printf("**** Warning: method AddrSpace::Mmap is not implemented yet\n");
   exit(-1);
+#endif
 }
 
 //----------------------------------------------------------------------
