@@ -182,15 +182,18 @@ int PhysicalMemManager::EvictPage()
 {
 #ifdef ETUDIANTS_TP
 	int local_i_clock = 0;
+  int count = 0;
   bool found = false;
-  bool allLocked = true;
-
-  tpr_c pPhys = tpr[local_i_clock];
-  int pVirt = pPhys.virtualPage;
-  translationTable *tt = pPhys.owner->translationTable;
+  tpr_c pPhys;
+  int pVirt;
+  translationTable *tt;
 
   while(!found)
   {
+    pPhys = tpr[local_i_clock];
+    pVirt = pPhys.virtualPage;
+    tt = pPhys.owner->translationTable;
+
     if(!tt->getBitU(pVirt) && pPhys.locked == false)
     {
       found = true;
@@ -198,15 +201,19 @@ int PhysicalMemManager::EvictPage()
     tt->clearBitU(pVirt);
 
     // If all pages are locked, suspend current thread
-    if(pPhys.locked == false)
-      allLocked = false;
-    if((local_i_clock == g_cfg->NumPhysPages-1) && allLocked)
+    if(count == g_cfg->NumPhysPages-1)
+    {
+      i_clock = local_i_clock;
       g_current_thread->Yield();
+      local_i_clock = (i_clock)%(g_cfg->NumPhysPages-1);
+      count = 0;
+    }
 
     local_i_clock = (local_i_clock+1)%(g_cfg->NumPhysPages-1);
+    count = count + 1;
   }
 
-  i_clock = local_i_clock;
+  i_clock = local_i_clock-1;
   pPhys.locked = true;
 
   if(tt->getBitM(pVirt))
