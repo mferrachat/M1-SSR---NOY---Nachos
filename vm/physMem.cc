@@ -181,7 +181,7 @@ int PhysicalMemManager::FindFreePage() {
 int PhysicalMemManager::EvictPage()
 {
 #ifdef ETUDIANTS_TP
-	int local_i_clock = 0;
+	int local_i_clock = i_clock;
   int count = 0;
   bool found = false;
   tpr_c pPhys;
