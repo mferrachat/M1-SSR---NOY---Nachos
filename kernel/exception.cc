@@ -739,9 +739,22 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
 
           case SC_MMAP: {
             DEBUG('e', (char*)"MMAP call.\n");
-            int arg;
-            arg = g_machine->ReadIntRegister(4);
-            // todo
+            int f;
+            int size;
+            int ret = 0;
+            f = g_machine->ReadIntRegister(4);
+            OpenFile *file = (OpenFile *)g_object_ids->SearchObject(f);
+            size = g_machine->ReadIntRegister(5);
+            if (file && file->type == FILE_TYPE)
+            {
+              ret = g_current_thread->GetProcessOwner()->addrspace->mmap(file,size);
+              g_syscall_error->SetMsg((char*)"",NO_ERROR);
+              g_machine->WriteIntRegister(2,ret);
+            }
+            else
+            {
+              g_syscall_error->SetMsg((char*)"",INVALID_FILE_ID);
+            }
           }
 
         #endif
