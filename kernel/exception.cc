@@ -747,9 +747,9 @@ void ExceptionHandler(ExceptionType exceptiontype, int vaddr)
             size = g_machine->ReadIntRegister(5);
             if (file && file->type == FILE_TYPE)
             {
-              ret = g_current_thread->GetProcessOwner()->addrspace->mmap(file,size);
-              g_syscall_error->SetMsg((char*)"",NO_ERROR);
+              ret = g_current_thread->GetProcessOwner()->addrspace->Mmap(file,size);
               g_machine->WriteIntRegister(2,ret);
+              g_syscall_error->SetMsg((char*)"",NO_ERROR);
             }
             else
             {

@@ -357,10 +357,19 @@ int AddrSpace::Alloc(int numPages)
 int AddrSpace::Mmap(OpenFile *f, int size)
 {
 #ifdef ETUDIANTS_TP
+	int nb_pages = size/g_cfg->PageSize + (size % g_cfg->PageSize == 0 ? 0 : 1);
+	int addr = translationTable->getAddrDisk(mapped_files[nb_mapped_files].first_address);
+
 	mapped_files[nb_mapped_files].first_address = (size % g_cfg->PageSize != 0) ? Alloc((size/g_cfg->PageSize)+1) : Alloc(size/g_cfg->PageSize);
 	mapped_files[nb_mapped_files].size = size;
 	mapped_files[nb_mapped_files].file = f;
 	nb_mapped_files++;
+	
+	// Association des adresses disques dans le fichier mappé
+	for(int i = mapped_files[nb_mapped_files].first_address; i < mapped_files[nb_mapped_files].first_address + nb_pages; i++)
+	{
+		//translationTable->setAddrDisk(i, addr + mapped_files[nb_mapped_files].file->Seek(i * g_cfg->PageSize));
+	}
 #endif
 #ifndef ETUDIANTS_TP
   printf("**** Warning: method AddrSpace::Mmap is not implemented yet\n");
@@ -381,7 +390,7 @@ OpenFile *AddrSpace::findMappedFile(int32_t addr) {
 	OpenFile *res = NULL;
 	for(i = 0; i < nb_mapped_files; i++)
 	{
-		if(addr >= mapped_files[i].first_address && addr <= mapped_files[i].first_address+size)
+		if(addr >= mapped_files[i].first_address && addr <= mapped_files[i].first_address+mapped_files[i].size)
 			res = mapped_files[i].file;
 	}
 	return res;
